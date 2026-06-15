@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm --version)",
+      "Bash(git --version)",
+      "Bash(node scripts/gen-icons.mjs)",
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5173/)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(cd \"C:\\\\Users\\\\Alejandro\\\\.claude\\\\projects\\\\C--Users-Alejandro-Downloads-MOTO-UPATA\\\\memory\")",
+      "Bash(ls -la)",
+      "mcp__visualize__read_me",
+      "mcp__visualize__show_widget",
+      "Bash(node -e \"const p=require\\('./node_modules/lucide-react/package.json'\\); console.log\\('version:', p.version, 'main:', p.main, 'module:', p.module\\);\")",
+      "Bash(npm uninstall *)",
+      "Bash(python -c \"import reportlab; print\\('reportlab', reportlab.Version\\)\")",
+      "Bash(python3 -c \"import reportlab; print\\('reportlab', reportlab.Version\\)\")",
+      "Bash(node -e \"const P=require\\('pdfkit'\\); console.log\\('pdfkit OK'\\)\")",
+      "Bash(node scripts/gen-presentacion.mjs)",
+      "Bash(node -e \"const b=require\\('fs'\\).readFileSync\\('Flashrider-Presentacion.pdf'\\); const s=b.toString\\('latin1'\\); const head=s.slice\\(0,8\\); const pages=\\(s.match\\(/\\\\/Type\\\\s*\\\\/Page[^s]/g\\)||[]\\).length; console.log\\('header:',head\\); console.log\\('paginas:',pages\\); console.log\\('tamano KB:', Math.round\\(b.length/1024\\)\\); console.log\\('cierra EOF:', s.trim\\(\\).endsWith\\('%%EOF'\\)\\);\")",
+      "Bash(node -e \"console.log\\('supabase-js', require\\('./node_modules/@supabase/supabase-js/package.json'\\).version\\)\")",
+      "mcp__Claude_in_Chrome__list_connected_browsers",
+      "Bash(explorer.exe dist *)",
+      "mcp__Claude_in_Chrome__navigate",
+      "mcp__Claude_in_Chrome__get_page_text",
+      "mcp__Claude_in_Chrome__read_page",
+      "mcp__Claude_in_Chrome__find",
+      "mcp__Claude_in_Chrome__javascript_tool",
+      "mcp__Claude_in_Chrome__form_input",
+      "Bash(git init *)",
+      "Bash(git add *)"
+    ]
+  }
+}

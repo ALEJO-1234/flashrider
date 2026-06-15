@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="es-VE">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#0B0B0F" />
+    <meta name="description" content="Flashrider — Pídela, súbete, llegaste. Moto, encomiendas y encargos." />
+    <title>Flashrider — Moto y delivery</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <script>
+      // MODO DEMO (opcional): ubicación fija para mostrar la app sin pedir permiso
+      // de GPS. Se activa solo si pones localStorage.upa_demo_geo = '1'.
+      // No afecta a usuarios reales (por defecto está apagado).
+      if (window.localStorage && localStorage.getItem('upa_demo_geo')) {
+        var _c = { latitude: 8.0106, longitude: -62.4055, accuracy: 20 };
+        navigator.geolocation.getCurrentPosition = function (ok) { ok({ coords: _c }); };
+        navigator.geolocation.watchPosition = function (ok) { ok({ coords: _c }); return 0; };
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
