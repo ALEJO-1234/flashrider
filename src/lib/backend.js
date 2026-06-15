@@ -60,16 +60,21 @@ function sbGuardar(col, obj) {
   })
 }
 
-if (supabase) {
-  // Carga inicial desde la nube.
+async function sincronizarDesdeNube() {
   for (const col of COLECCIONES) {
-    supabase.from(col).select('id,data').then(({ data, error }) => {
-      if (error) { console.warn('[Supabase] cargar', col, error.message); return }
-      cache[col] = (data || []).map((r) => r.data)
-      persistir(col); notificar(col)
-    })
+    const { data, error } = await supabase.from(col).select('id,data')
+    if (error) { console.warn('[Supabase] sync', col, error.message); continue }
+    cache[col] = (data || []).map((r) => r.data)
+    persistir(col); notificar(col)
   }
-  // Tiempo real: cualquier cambio en la nube actualiza la caché.
+}
+
+if (supabase) {
+  // Carga inicial y polling cada 3 segundos para sincronizar entre dispositivos.
+  sincronizarDesdeNube()
+  setInterval(sincronizarDesdeNube, 3000)
+
+  // Realtime como bonus (funciona si las tablas tienen replicación activada).
   supabase.channel('upa-realtime')
     .on('postgres_changes', { event: '*', schema: 'public' }, (payload) => {
       const col = payload.table
