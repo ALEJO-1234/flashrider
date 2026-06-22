@@ -1,12 +1,11 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import MapaViaje from './components/MapaViaje.jsx'
 import { UPATA_CENTER, TIPOS_SERVICIO, TARIFAS_FIJAS, CANCELACION, VELOCIDAD_MOTO_KMH, RADIO_PEDIDOS_KM, SOLO_MOTOTAXI } from './lib/config.js'
 import { ubicacionActual, distanciaKm, etaMinutos } from './lib/geo.js'
-import { obtenerRuta, largoRuta, posicionEnRuta } from './lib/ruta.js'
 import { calcularTarifa, formatoUsd, formatoBs } from './lib/fare.js'
 import { useTasa } from './lib/bcv.js'
 import { compartirViaje, alertaEmergencia } from './lib/acciones.js'
-import { crearViaje, actualizarViaje, actualizarConductor, ajustarSaldo, calificarConductor, obtenerConductores, obtenerViaje } from './lib/backend.js'
+import { crearViaje, actualizarViaje, ajustarSaldo, calificarConductor } from './lib/backend.js'
 import { useViajes, useConductores, useComercios } from './lib/useDatos.js'
 import { Logo, User, Pin, Alert, Star, Send, X, Clock, Bike, Store, ChevronRight, TipoIco } from './icons.jsx'
 
@@ -18,11 +17,6 @@ export default function PasajeroApp({ onCambiarRol }) {
   const [viajeId, setViajeId] = useState(null)
   const [aviso, setAviso] = useState('')
   const [comercioSel, setComercioSel] = useState(null) // comercio elegido para delivery
-  const [ruta, setRuta] = useState(null) // ruta por calles del trayecto actual
-  const avance = useRef(0)
-  // Modo demo: una moto simulada sale de lejos, te recoge y te lleva — todo en
-  // esta pantalla, para probar el servicio completo solo (y mostrarlo al cliente).
-  const [demo, setDemo] = useState(() => localStorage.getItem('upa_demo_sim') === '1')
 
   const tasa = useTasa()
   const viajes = useViajes()
@@ -31,7 +25,7 @@ export default function PasajeroApp({ onCambiarRol }) {
   const comerciosAbiertos = comercios.filter((c) => c.verificado && c.abierto)
   const viaje = viajes.find((v) => v.id === viajeId)
 
-  // En viaje/encomienda la tarifa se calcula origen→destino marcado en el mapa.
+  // En viaje la tarifa se calcula origen→destino marcado en el mapa.
   // En delivery se calcula del comercio elegido hasta tu ubicación.
   const tarifa = tipo === 'delivery'
     ? (comercioSel && origen ? calcularTarifa(comercioSel.ubicacion, origen, new Date(), 'delivery', tasa) : null)
@@ -54,39 +48,6 @@ export default function PasajeroApp({ onCambiarRol }) {
     })
   }, [])
 
-  // Simulación de la moto en modo demo: recorre la RUTA POR LAS CALLES hacia ti
-  // y luego al destino, visible en el mapa de esta misma pantalla.
-  useEffect(() => {
-    if (!viaje || viaje.conductor_id !== 'demo' || !['en_camino', 'en_curso'].includes(viaje.estado)) { setRuta(null); return }
-    let cancel = false, timer
-    const inicio = viaje.moto || viaje.origen
-    const objetivo = viaje.estado === 'en_camino' ? viaje.origen : viaje.destino
-    avance.current = 0
-    obtenerRuta(inicio, objetivo).then((pts) => {
-      if (cancel) return
-      setRuta(pts)
-      const total = largoRuta(pts)
-      timer = setInterval(() => {
-        const v = obtenerViaje(viaje.id)
-        if (!v || v.estado === 'cancelado') { clearInterval(timer); return }
-        avance.current += 0.03
-        if (avance.current >= total) {
-          const fin = pts[pts.length - 1]
-          if (v.estado === 'en_camino') {
-            actualizarViaje(v.id, { estado: 'llego', moto: fin })
-            setTimeout(() => { const vv = obtenerViaje(v.id); if (vv?.estado === 'llego') actualizarViaje(v.id, { estado: 'en_curso' }) }, 1500)
-          } else {
-            actualizarViaje(v.id, { estado: 'completado', moto: fin })
-          }
-          clearInterval(timer)
-        } else {
-          actualizarViaje(v.id, { moto: posicionEnRuta(pts, avance.current) })
-        }
-      }, 300)
-    })
-    return () => { cancel = true; clearInterval(timer) }
-  }, [viaje?.id, viaje?.estado]) // eslint-disable-line
-
   function pedir() {
     // DELIVERY: el viaje va del comercio (origen) a tu casa (destino). Primero
     // lo recibe el comercio para confirmar; luego se difunde a los motorizados.
@@ -101,18 +62,7 @@ export default function PasajeroApp({ onCambiarRol }) {
       return
     }
     const t = calcularTarifa(origen, destino, new Date(), tipo, tasa)
-    if (demo && tipo === 'viaje') {
-      // Moto simulada que sale a ~1,5 km y viene hacia ti (solo para mototaxi).
-      const inicio = puntoLejano(origen, 1.5)
-      const nuevo = crearViaje({
-        tipo, origen, destino, nota, tarifa: t,
-        conductor_id: 'demo', estado: 'en_camino', moto: inicio,
-        conductor: { nombre: 'Luis Martínez', placa: 'DEMO01', moto: 'Bera SBR 150', estrellas: 4.8, numResenas: 12, inicial: 'L' }
-      })
-      setViajeId(nuevo.id)
-      return
-    }
-    // Modo real: se difunde a las motos cercanas; la primera que acepte la bloquea.
+    // Se difunde a las motos cercanas; la primera que acepte la bloquea.
     const nuevo = crearViaje({ tipo, origen, destino, nota, tarifa: t })
     setViajeId(nuevo.id)
   }
@@ -157,7 +107,7 @@ export default function PasajeroApp({ onCambiarRol }) {
       <div className="map-wrap">
         {!viaje && tipo !== 'delivery' && !destino && <div className="map-hint"><Pin size={15} /> Toca el mapa para marcar tu destino</div>}
         <MapaViaje origen={tipo === 'delivery' ? (comercioSel?.ubicacion || origen) : origen} destino={tipo === 'delivery' ? origen : destino}
-          moto={viaje?.moto} ruta={ruta} center={origen || UPATA_CENTER} onPick={!viaje && tipo !== 'delivery' ? setDestino : null} />
+          moto={viaje?.moto} center={origen || UPATA_CENTER} onPick={!viaje && tipo !== 'delivery' ? setDestino : null} />
         {enViaje && <button className="emergencia" onClick={emergencia}><Alert size={20} />SOS</button>}
       </div>
 
@@ -217,14 +167,9 @@ export default function PasajeroApp({ onCambiarRol }) {
               </>
             )
           ) : (
-            // ===== Flujo de VIAJE / ENCOMIENDA =====
+            // ===== Flujo de VIAJE =====
             <>
               <p className="sub">{destino ? '¿Confirmas tu carrera?' : 'Marca tu destino en el mapa.'}</p>
-
-              {tipo === 'encomienda' && (
-                <textarea rows={2} placeholder="¿Qué envías? (descripción del paquete)"
-                  value={nota} onChange={(e) => setNota(e.target.value)} />
-              )}
 
               {tarifa && (
                 <>
@@ -239,20 +184,12 @@ export default function PasajeroApp({ onCambiarRol }) {
                 </>
               )}
 
-              {origen && !demo && (
+              {origen && (
                 <div className={'disponibilidad' + (masCercana ? ' on' : '')}>
                   {masCercana
                     ? <><Clock size={16} /> Moto más cercana: <strong>~{etaMinutos(masCercana.dist, VELOCIDAD_MOTO_KMH)} min</strong> · {cercanas.length} en línea</>
                     : <><Clock size={16} /> No hay motos en línea ahora. Puedes pedir igual y esperar.</>}
                 </div>
-              )}
-
-              {tipo === 'viaje' && (
-                <label className="demo-toggle">
-                  <input type="checkbox" checked={demo}
-                    onChange={(e) => { setDemo(e.target.checked); localStorage.setItem('upa_demo_sim', e.target.checked ? '1' : '0') }} />
-                  <span>Modo demo — la moto se maneja sola (ideal para probar y mostrar)</span>
-                </label>
               )}
 
               <button className="btn btn-primary" disabled={!origen || !destino} onClick={pedir}>
@@ -350,12 +287,4 @@ function Calificar({ viaje, onListo }) {
       <button className="btn btn-ghost" onClick={onListo}>Ahora no</button>
     </div>
   )
-}
-
-// Devuelve un punto a ~km de distancia del centro, en dirección aleatoria.
-function puntoLejano(centro, km = 1.5) {
-  const ang = Math.random() * 2 * Math.PI
-  const dLat = (km / 111) * Math.cos(ang)
-  const dLng = (km / (111 * Math.cos((centro.lat * Math.PI) / 180))) * Math.sin(ang)
-  return { lat: centro.lat + dLat, lng: centro.lng + dLng }
 }

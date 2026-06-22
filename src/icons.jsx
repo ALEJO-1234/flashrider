@@ -82,7 +82,6 @@ export function Logo() {
 
 // Icono según el tipo de servicio.
 export function TipoIco({ tipo, size = 22 }) {
-  if (tipo === 'encomienda') return <Package size={size} />
   if (tipo === 'delivery') return <Bag size={size} />
   return <Bike size={size} />
 }

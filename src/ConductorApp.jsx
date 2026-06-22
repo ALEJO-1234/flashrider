@@ -142,7 +142,7 @@ export default function ConductorApp({ onCambiarRol }) {
           <div className="nota">
             {CUENTAS_RECARGA.pagoMovil}
           </div>
-          <p className="sub">Monto a recargar (en esta demo se acredita al instante):</p>
+          <p className="sub">Monto a recargar:</p>
           <div className="btn-row">
             <button className="btn btn-sec" onClick={() => recargar(1000)}>Bs 1.000</button>
             <button className="btn btn-sec" onClick={() => recargar(5000)}>Bs 5.000</button>
@@ -212,11 +212,11 @@ export default function ConductorApp({ onCambiarRol }) {
           </div>
           {activo.estado === 'llego' && (
             <button className="btn btn-primary" onClick={recogi}>
-              {activo.tipo === 'viaje' ? 'Recogí al pasajero — iniciar' : 'Recogí el paquete — iniciar'}
+              {activo.tipo === 'viaje' ? 'Recogí al pasajero — iniciar' : 'Recogí el pedido — iniciar'}
             </button>
           )}
           {activo.estado !== 'llego' && (
-            <p className="sub center">La moto avanza sola en la demo…</p>
+            <p className="sub center">Tu ubicación se actualiza en el mapa mientras avanzas.</p>
           )}
         </div>
       )}

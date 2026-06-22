@@ -5,8 +5,8 @@
 // Centro de Upata (Plaza Miranda aprox.) — origen por defecto del mapa.
 export const UPATA_CENTER = { lat: 8.0106, lng: -62.4055 }
 
-// MODO PRUEBA: enfoca la app SOLO en mototaxi (encomienda y delivery quedan
-// como "Pronto"). En false se activan todos los servicios y la afiliación de comercios.
+// MODO PRUEBA: enfoca la app SOLO en mototaxi (delivery queda como "Pronto").
+// En false se activan todos los servicios y la afiliación de comercios.
 export const SOLO_MOTOTAXI = false
 
 // === TARIFAS FIJAS (EN BOLÍVARES) ===
@@ -50,11 +50,9 @@ export const VELOCIDAD_MOTO_KMH = 22
 export const RADIO_PEDIDOS_KM = 4
 
 // Tipos de servicio. Misma flota, distinto pedido (Fase 2 del plan: delivery).
-// 'recargo' es un cargo fijo extra (Bs) que se suma a la tarifa del conductor.
 export const TIPOS_SERVICIO = {
-  viaje:      { label: 'Viaje',      recargo: 0,   desc: 'Te llevamos a tu destino' },
-  encomienda: { label: 'Encomienda', recargo: 500, desc: 'Enviar o recibir un paquete' },
-  delivery:   { label: 'Delivery',   recargo: 0, desc: 'Comida y productos de comercios afiliados' }
+  viaje:    { label: 'Viaje',    desc: 'Te llevamos a tu destino' },
+  delivery: { label: 'Delivery', desc: 'Comida y productos de comercios afiliados' }
 }
 
 // Tasa BCV de respaldo (Bs por USD) si falla la consulta automática al BCV.
